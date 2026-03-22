@@ -340,32 +340,34 @@
   const bgm = document.getElementById('bgm');
   let playing = false;
 
-  // Start on first tap anywhere (browser autoplay policy requires user gesture)
-  document.body.addEventListener('click', function startOnce() {
-    if (!playing) {
-      bgm.volume = 0.8;
-      bgm.play().then(() => {
-        playing = true;
-        updateUI();
-      }).catch(() => {});
-    }
-    document.body.removeEventListener('click', startOnce);
+  function startMusic() {
+    if (playing) return;
+    bgm.volume = 0.8;
+    bgm.play().then(() => {
+      playing = true;
+      updateUI();
+    }).catch(() => {});
+  }
+
+  // Try autoplay immediately on load
+  window.addEventListener('load', () => {
+    startMusic();
   });
 
-  // Pulse the button to hint the user
-  window.addEventListener('load', () => {
-    document.getElementById('musicBtn').style.animation = 'nudge 0.9s ease-in-out 4';
+  // Fallback: start on very first interaction if autoplay was blocked
+  document.body.addEventListener('click', function startOnce() {
+    startMusic();
+    document.body.removeEventListener('click', startOnce);
   });
 
   function toggleMusic() {
     if (playing) {
       bgm.pause();
       playing = false;
+      updateUI();
     } else {
-      bgm.play().then(() => { playing = true; updateUI(); }).catch(() => {});
-      playing = true;
+      startMusic();
     }
-    updateUI();
   }
 
   function updateUI() {
