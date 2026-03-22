@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Can I call you mine? 🐼💕</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root { --pink: #ff6b9d; --pink-light: #ffb3d1; --rose: #e8326a; --cream: #fff0f5; }
+
+    body { font-family: 'Nunito', sans-serif; background: var(--cream); min-height: 100vh; overflow-x: hidden; }
+
+    /* PAGES */
+    .page { display: none; min-height: 100vh; flex-direction: column; align-items: center; justify-content: center; padding: 2rem 1rem 5rem; position: relative; }
+    .page.active { display: flex; }
+
+    /* FALLING HEARTS */
+    .heart-container { position: fixed; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:0; overflow:hidden; }
+    .heart { position:absolute; top:-60px; animation:fall linear infinite; opacity:0; user-select:none; }
+    @keyframes fall {
+      0%   { top:-60px; opacity:0; transform:rotate(0deg) scale(0.8); }
+      10%  { opacity:1; }
+      90%  { opacity:0.7; }
+      100% { top:110vh; opacity:0; transform:rotate(360deg) scale(1.1); }
+    }
+
+    /* FLOATING CORNER PANDAS */
+    .panda-float { position:fixed; pointer-events:none; z-index:0; animation:floatP ease-in-out infinite alternate; opacity:0.25; }
+    @keyframes floatP { 0% { transform:translateY(0) rotate(-5deg); } 100% { transform:translateY(-18px) rotate(5deg); } }
+
+    .z1 { position:relative; z-index:1; }
+
+    /* BADGE */
+    .badge {
+      background:white; border:2.5px solid var(--pink-light); border-radius:50px;
+      padding:0.45rem 1.4rem; font-size:0.85rem; font-weight:800; color:var(--rose);
+      margin-bottom:1.2rem; box-shadow:0 3px 12px rgba(232,50,106,0.12);
+      animation:popIn 0.6s cubic-bezier(0.34,1.56,0.64,1) both;
+    }
+    @keyframes popIn { from { transform:scale(0.5); opacity:0; } to { transform:scale(1); opacity:1; } }
+
+    h1 {
+      font-size:clamp(1.35rem,4.2vw,2.1rem); font-weight:900; color:var(--rose);
+      text-align:center; margin-bottom:0.5rem; line-height:1.35; max-width:560px;
+      animation:popIn 0.7s cubic-bezier(0.34,1.56,0.64,1) 0.1s both;
+    }
+    .sub {
+      font-size:0.95rem; font-weight:700; color:#c0607a; margin-bottom:1.8rem;
+      animation:popIn 0.7s cubic-bezier(0.34,1.56,0.64,1) 0.15s both; text-align:center;
+    }
+
+    /* MAIN GIF */
+    .main-gif-wrap {
+      width:200px; height:200px; border-radius:50%; overflow:hidden;
+      border:4px solid var(--pink); box-shadow:0 6px 28px rgba(255,107,157,0.3);
+      margin-bottom:1.8rem; background:white; display:flex; align-items:center; justify-content:center;
+      animation:popIn 0.8s cubic-bezier(0.34,1.56,0.64,1) 0.2s both; flex-shrink:0;
+    }
+    .main-gif-wrap img { width:100%; height:100%; object-fit:cover; }
+
+    /* BUTTONS */
+    .buttons { display:flex; flex-direction:column; align-items:center; gap:1rem; animation:popIn 0.8s cubic-bezier(0.34,1.56,0.64,1) 0.3s both; }
+    .btn-yes {
+      background:linear-gradient(135deg,#e8326a,#ff6b9d); color:white; border:none;
+      padding:1rem 3.5rem; border-radius:50px; font-family:'Nunito',sans-serif;
+      font-size:1.25rem; font-weight:900; cursor:pointer;
+      box-shadow:0 6px 22px rgba(232,50,106,0.4); transition:transform 0.15s ease, box-shadow 0.15s ease;
+    }
+    .btn-yes:hover { transform:scale(1.08) translateY(-2px); box-shadow:0 10px 30px rgba(232,50,106,0.5); }
+    .btn-yes:active { transform:scale(0.97); }
+    .btn-no {
+      background:white; color:var(--pink); border:2.5px solid var(--pink);
+      padding:0.75rem 2.5rem; border-radius:50px; font-family:'Nunito',sans-serif;
+      font-size:1rem; font-weight:800; cursor:pointer; transition:transform 0.12s ease; position:relative;
+    }
+    .btn-no:hover { background:#fff0f5; }
+
+    /* TOAST */
+    .toast {
+      position:fixed; bottom:2rem; left:50%;
+      transform:translateX(-50%) translateY(80px);
+      background:white; color:var(--rose); font-weight:800; font-size:1rem;
+      padding:0.8rem 1.8rem; border-radius:50px; border:2px solid var(--pink-light);
+      box-shadow:0 6px 24px rgba(255,107,157,0.25); z-index:999; opacity:0;
+      transition:transform 0.4s cubic-bezier(0.34,1.56,0.64,1), opacity 0.3s ease;
+      white-space:nowrap; pointer-events:none;
+    }
+    .toast.show { transform:translateX(-50%) translateY(0); opacity:1; }
+
+    /* MUSIC BUTTON */
+    .music-btn {
+      position:fixed; top:1.2rem; right:1.2rem; z-index:100;
+      background:white; border:2px solid var(--pink-light); border-radius:50px;
+      padding:0.5rem 1.1rem; font-size:0.85rem; font-weight:800; color:var(--rose);
+      cursor:pointer; box-shadow:0 4px 16px rgba(255,107,157,0.2);
+      display:flex; align-items:center; gap:0.5rem; transition:transform 0.2s ease;
+    }
+    .music-btn:hover { transform:scale(1.05); }
+    @keyframes nudge { 0%,100%{transform:scale(1)} 50%{transform:scale(1.13)} }
+
+    .eq-bars { display:flex; gap:2px; align-items:flex-end; height:16px; }
+    .eq-bar { width:3px; border-radius:2px; background:var(--rose); animation:eq 0.6s ease-in-out infinite alternate; }
+    .eq-bar:nth-child(1){ height:6px;  animation-delay:0s; }
+    .eq-bar:nth-child(2){ height:14px; animation-delay:0.1s; }
+    .eq-bar:nth-child(3){ height:8px;  animation-delay:0.2s; }
+    .eq-bar:nth-child(4){ height:12px; animation-delay:0.05s; }
+    .eq-bar.paused { animation-play-state:paused; height:4px !important; }
+    @keyframes eq { from { transform:scaleY(0.3); } to { transform:scaleY(1); } }
+
+    /* ════════════════════════
+       CSS PANDA ANIMATION
+    ════════════════════════ */
+    .panda-scene {
+      display:flex; align-items:flex-end; justify-content:center; gap:8px;
+      margin-bottom:1.8rem;
+      animation:popIn 0.8s cubic-bezier(0.34,1.56,0.64,1) 0.2s both;
+    }
+    .panda { display:flex; flex-direction:column; align-items:center; position:relative; }
+    .panda-left  { animation:swayL 2s ease-in-out infinite alternate; }
+    .panda-right { animation:swayR 2s ease-in-out infinite alternate; }
+    @keyframes swayL { from{transform:rotate(-6deg);} to{transform:rotate(2deg);} }
+    @keyframes swayR { from{transform:rotate(6deg);}  to{transform:rotate(-2deg);} }
+
+    .panda-head {
+      width:70px; height:65px; background:white; border-radius:50%;
+      border:3px solid #222; position:relative;
+      display:flex; align-items:center; justify-content:center; z-index:2;
+    }
+    .panda-ear { position:absolute; width:22px; height:22px; background:#222; border-radius:50%; top:-10px; }
+    .panda-ear-l { left:4px; }
+    .panda-ear-r { right:4px; }
+    .panda-eye { position:absolute; width:18px; height:18px; background:#222; border-radius:50%; top:18px; }
+    .eye-l { left:10px; }
+    .eye-r { right:10px; }
+    .panda-eye::after { content:''; position:absolute; width:6px; height:6px; background:white; border-radius:50%; top:2px; left:2px; }
+    .panda-blush { position:absolute; width:14px; height:8px; background:#ffb3cc; border-radius:50%; bottom:14px; opacity:0.8; }
+    .blush-l { left:8px; }
+    .blush-r { right:8px; }
+    .panda-nose { position:absolute; bottom:18px; width:10px; height:7px; background:#555; border-radius:50%; }
+    .panda-body {
+      width:60px; height:55px; background:white;
+      border-radius:40% 40% 50% 50%; border:3px solid #222;
+      margin-top:-6px; position:relative; z-index:1;
+    }
+    .panda-arm { position:absolute; width:22px; height:12px; background:#222; border-radius:50px; top:12px; }
+    .panda-left  .arm-l { left:-16px;  transform:rotate(30deg); }
+    .panda-left  .arm-r { right:-18px; transform:rotate(-30deg); animation:hugR 2s ease-in-out infinite alternate; }
+    .panda-right .arm-l { left:-18px;  transform:rotate(30deg);  animation:hugL 2s ease-in-out infinite alternate; }
+    .panda-right .arm-r { right:-16px; transform:rotate(-30deg); }
+    @keyframes hugR { from{transform:rotate(-30deg);} to{transform:rotate(-48deg) translateX(3px);} }
+    @keyframes hugL { from{transform:rotate(30deg);}  to{transform:rotate(48deg) translateX(-3px);} }
+
+    .anim-hearts { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; padding-bottom:10px; }
+    .ah { font-size:1.2rem; animation:floatH 1.8s ease-in-out infinite; }
+    .ah1 { animation-delay:0s; }
+    .ah2 { animation-delay:0.5s; font-size:1rem; }
+    .ah3 { animation-delay:1s;   font-size:0.85rem; }
+    @keyframes floatH { 0%,100%{transform:translateY(0) scale(1); opacity:1;} 50%{transform:translateY(-10px) scale(1.15); opacity:0.8;} }
+
+    .msg {
+      font-size:1.15rem; font-weight:800; color:var(--rose); text-align:center;
+      line-height:1.6; max-width:360px;
+      animation:popIn 0.8s cubic-bezier(0.34,1.56,0.64,1) 0.3s both;
+    }
+
+    /* CONFETTI */
+    .confetti-piece { position:fixed; border-radius:3px; pointer-events:none; z-index:9999; animation:cFall linear forwards; }
+    @keyframes cFall { 0%{opacity:1;transform:translateY(-10px) rotate(0deg);} 100%{opacity:0;transform:translateY(110vh) rotate(720deg);} }
+
+    /* BOTTOM PANDA STRIP */
+    .panda-strip { position:fixed; bottom:0; left:0; width:100%; display:flex; justify-content:space-around; align-items:flex-end; pointer-events:none; z-index:0; padding:0 1rem; }
+    .panda-strip img { width:65px; height:65px; object-fit:contain; opacity:0.45; }
+
+    @media(max-width:480px){ h1{font-size:1.2rem;} .panda-head{width:58px;height:54px;} .panda-body{width:50px;height:46px;} }
+  </style>
+</head>
+<body>
+
+<div class="heart-container" id="heartContainer"></div>
+
+<!-- Corner floaters -->
+<div class="panda-float" style="top:5%;left:3%;font-size:2.2rem;animation-duration:3.2s;">🐼</div>
+<div class="panda-float" style="top:8%;right:4%;font-size:1.8rem;animation-duration:4s;animation-delay:1s;">🌸</div>
+<div class="panda-float" style="top:45%;left:2%;font-size:1.9rem;animation-duration:3.6s;animation-delay:0.5s;">💕</div>
+<div class="panda-float" style="top:40%;right:2%;font-size:1.9rem;animation-duration:4.4s;animation-delay:1.5s;">🐾</div>
+<div class="panda-float" style="top:72%;left:4%;font-size:1.6rem;animation-duration:3s;animation-delay:0.8s;">🐼</div>
+<div class="panda-float" style="top:70%;right:3%;font-size:1.6rem;animation-duration:3.8s;animation-delay:0.3s;">🌸</div>
+
+<!-- Music button -->
+<button class="music-btn" id="musicBtn" onclick="toggleMusic()">
+  <span id="musicIcon">🔇</span>
+  <span>Anjaan BGM</span>
+  <div class="eq-bars">
+    <div class="eq-bar paused"></div>
+    <div class="eq-bar paused"></div>
+    <div class="eq-bar paused"></div>
+    <div class="eq-bar paused"></div>
+  </div>
+</button>
+
+<!-- ═══ PAGE 1: MAIN ═══ -->
+<div class="page active" id="page-main">
+  <div class="badge z1">🐼 For My Special Someone 🐼</div>
+  <h1 class="z1">Can I officially stop calling you just a crush and start calling you mine? 💕</h1>
+  <p class="sub z1">— your panda-loving admirer 🐾</p>
+  <div class="main-gif-wrap z1">
+    <img id="mainGif" src="https://media1.tenor.com/m/mSO2fUNl2uIAAAAd/panda-love-heart.gif" alt="panda heart"/>
+  </div>
+  <div class="buttons z1" id="buttonsWrap">
+    <button class="btn-yes" id="yesBtn" onclick="sayYes()">Yes! 🐼💕</button>
+    <button class="btn-no" id="noBtn" onclick="clickNo()" onmouseover="moveNoBtn()">No 😅</button>
+  </div>
+  <div class="panda-strip">
+    <img src="https://media.tenor.com/OzxBMWtxNWsAAAAM/panda-love.gif" alt=""/>
+    <img src="https://media1.tenor.com/m/mSO2fUNl2uIAAAAd/panda-love-heart.gif" alt=""/>
+    <img src="https://media.tenor.com/OzxBMWtxNWsAAAAM/panda-love.gif" alt=""/>
+  </div>
+</div>
+
+<!-- ═══ PAGE 2: YES ═══ -->
+<div class="page" id="page-yes">
+  <div class="badge z1">🎉 You said YES! 🎉</div>
+  <h1 class="z1">Knew you would! 🐼💕</h1>
+  <p class="sub z1">You just made me the happiest ever!</p>
+
+  <!-- CSS panda couple animation -->
+  <div class="panda-scene z1">
+    <div class="panda panda-left">
+      <div class="panda-ear panda-ear-l"></div><div class="panda-ear panda-ear-r"></div>
+      <div class="panda-head">
+        <div class="panda-eye eye-l"></div><div class="panda-eye eye-r"></div>
+        <div class="panda-nose"></div>
+        <div class="panda-blush blush-l"></div><div class="panda-blush blush-r"></div>
+      </div>
+      <div class="panda-body">
+        <div class="panda-arm arm-l"></div><div class="panda-arm arm-r"></div>
+      </div>
+    </div>
+    <div class="anim-hearts">
+      <span class="ah ah1">💕</span>
+      <span class="ah ah2">💖</span>
+      <span class="ah ah3">🌸</span>
+    </div>
+    <div class="panda panda-right">
+      <div class="panda-ear panda-ear-l"></div><div class="panda-ear panda-ear-r"></div>
+      <div class="panda-head">
+        <div class="panda-eye eye-l"></div><div class="panda-eye eye-r"></div>
+        <div class="panda-nose"></div>
+        <div class="panda-blush blush-l"></div><div class="panda-blush blush-r"></div>
+      </div>
+      <div class="panda-body">
+        <div class="panda-arm arm-l"></div><div class="panda-arm arm-r"></div>
+      </div>
+    </div>
+  </div>
+
+  <p class="msg z1">You are officially MINE now 🐼💕<br>and I am officially yours! 🌸</p>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- Hidden YouTube iframe slot -->
+<div style="position:fixed;width:0;height:0;overflow:hidden;bottom:0;right:0;"><div id="ytPlayer"></div></div>
+
+<script>
+  /* FALLING HEARTS */
+  const emojis = ['💕','💗','💖','💓','🌸','🐼','🐾','💝','🩷','💞','✨'];
+  const hc = document.getElementById('heartContainer');
+  for (let i = 0; i < 24; i++) {
+    const h = document.createElement('div');
+    h.className = 'heart';
+    h.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+    h.style.left = Math.random() * 100 + '%';
+    h.style.fontSize = (1 + Math.random() * 1.2) + 'rem';
+    const dur = 6 + Math.random() * 9;
+    h.style.animationDuration = dur + 's';
+    h.style.animationDelay = (-Math.random() * dur) + 's';
+    hc.appendChild(h);
+  }
+
+  /* NO BUTTON */
+  let noCount = 0;
+  const noMsgs = [
+    "Are you sure? 🥺","Think again... 🐼","The panda is sad now 😢",
+    "Come on, you know you want to! 💕","Last chance before I cry 😭",
+    "The pandas are watching... 👀","Just say yes already! 🙏",
+    "You're breaking my bamboo heart 💔"
+  ];
+  const noGifs = [
+    "https://media1.tenor.com/m/mSO2fUNl2uIAAAAd/panda-love-heart.gif",
+    "https://media.tenor.com/OzxBMWtxNWsAAAAM/panda-love.gif"
+  ];
+
+  function moveNoBtn() {
+    const btn = document.getElementById('noBtn');
+    const maxX = Math.min(180, window.innerWidth / 2 - 80);
+    btn.style.transform = `translate(${(Math.random()-0.5)*2*maxX}px,${(Math.random()-0.5)*80}px)`;
+  }
+
+  function clickNo() {
+    noCount++;
+    const yes = document.getElementById('yesBtn');
+    yes.style.transform = `scale(${Math.min(1 + noCount * 0.12, 1.7)})`;
+    showToast(noMsgs[Math.min(noCount - 1, noMsgs.length - 1)]);
+    if (noCount % 2 === 0)
+      document.getElementById('mainGif').src = noGifs[noCount % noGifs.length];
+  }
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(window._tt);
+    window._tt = setTimeout(() => t.classList.remove('show'), 2400);
+  }
+
+  /* YES - switch to page 2 */
+  function sayYes() {
+    document.getElementById('page-main').classList.remove('active');
+    document.getElementById('page-yes').classList.add('active');
+    launchConfetti();
+  }
+
+  /* CONFETTI */
+  function launchConfetti() {
+    const cols = ['#ff6b9d','#e8326a','#ffb3d1','#c084fc','#ffe066','#fff0f5'];
+    for (let i = 0; i < 100; i++) {
+      setTimeout(() => {
+        const c = document.createElement('div');
+        c.className = 'confetti-piece';
+        c.style.cssText = `left:${Math.random()*100}vw;top:-10px;background:${cols[Math.floor(Math.random()*cols.length)]};width:${6+Math.random()*8}px;height:${6+Math.random()*8}px;border-radius:${Math.random()>0.5?'50%':'3px'};animation-duration:${2.5+Math.random()*3}s`;
+        document.body.appendChild(c);
+        setTimeout(() => c.remove(), 6000);
+      }, i * 35);
+    }
+  }
+
+  /* MUSIC — YouTube IFrame API */
+  let ytReady = false, ytObj = null, playing = false;
+
+  const ytTag = document.createElement('script');
+  ytTag.src = 'https://www.youtube.com/iframe_api';
+  document.head.appendChild(ytTag);
+
+  window.onYouTubeIframeAPIReady = function() {
+    ytObj = new YT.Player('ytPlayer', {
+      width: '1', height: '1',
+      videoId: 'Pw9IL9zVgOY',
+      playerVars: { autoplay: 0, loop: 1, playlist: 'Pw9IL9zVgOY', controls: 0 },
+      events: {
+        onReady: () => {
+          ytReady = true;
+          ytObj.setVolume(85);
+          // Pulse button to hint user to tap for music
+          document.getElementById('musicBtn').style.animation = 'nudge 0.9s ease-in-out 4';
+        }
+      }
+    });
+  };
+
+  // First tap anywhere on page starts music (needed for browser autoplay policy)
+  document.body.addEventListener('click', function startOnce() {
+    if (ytReady && ytObj && !playing) {
+      ytObj.playVideo();
+      playing = true;
+      updateUI();
+    }
+    document.body.removeEventListener('click', startOnce);
+  });
+
+  function toggleMusic() {
+    if (!ytReady || !ytObj) return;
+    playing ? ytObj.pauseVideo() : ytObj.playVideo();
+    playing = !playing;
+    updateUI();
+  }
+
+  function updateUI() {
+    document.getElementById('musicIcon').textContent = playing ? '🔊' : '🔇';
+    document.querySelectorAll('.eq-bar').forEach(b => playing ? b.classList.remove('paused') : b.classList.add('paused'));
+  }
+</script>
+</body>
+</html>
