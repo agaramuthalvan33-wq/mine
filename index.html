@@ -260,8 +260,8 @@
 
 <div class="toast" id="toast"></div>
 
-<!-- Hidden YouTube iframe slot -->
-<div style="position:fixed;width:0;height:0;overflow:hidden;bottom:0;right:0;"><div id="ytPlayer"></div></div>
+<!-- Background audio: upload bgm.mp3 to your repo root -->
+<audio id="bgm" src="bgm.mp3" loop preload="auto"></audio>
 
 <script>
   /* FALLING HEARTS */
@@ -336,43 +336,35 @@
     }
   }
 
-  /* MUSIC — YouTube IFrame API */
-  let ytReady = false, ytObj = null, playing = false;
+  /* MUSIC — local bgm.mp3 */
+  const bgm = document.getElementById('bgm');
+  let playing = false;
 
-  const ytTag = document.createElement('script');
-  ytTag.src = 'https://www.youtube.com/iframe_api';
-  document.head.appendChild(ytTag);
-
-  window.onYouTubeIframeAPIReady = function() {
-    ytObj = new YT.Player('ytPlayer', {
-      width: '1', height: '1',
-      videoId: 'Pw9IL9zVgOY',
-      playerVars: { autoplay: 0, loop: 1, playlist: 'Pw9IL9zVgOY', controls: 0 },
-      events: {
-        onReady: () => {
-          ytReady = true;
-          ytObj.setVolume(85);
-          // Pulse button to hint user to tap for music
-          document.getElementById('musicBtn').style.animation = 'nudge 0.9s ease-in-out 4';
-        }
-      }
-    });
-  };
-
-  // First tap anywhere on page starts music (needed for browser autoplay policy)
+  // Start on first tap anywhere (browser autoplay policy requires user gesture)
   document.body.addEventListener('click', function startOnce() {
-    if (ytReady && ytObj && !playing) {
-      ytObj.playVideo();
-      playing = true;
-      updateUI();
+    if (!playing) {
+      bgm.volume = 0.8;
+      bgm.play().then(() => {
+        playing = true;
+        updateUI();
+      }).catch(() => {});
     }
     document.body.removeEventListener('click', startOnce);
   });
 
+  // Pulse the button to hint the user
+  window.addEventListener('load', () => {
+    document.getElementById('musicBtn').style.animation = 'nudge 0.9s ease-in-out 4';
+  });
+
   function toggleMusic() {
-    if (!ytReady || !ytObj) return;
-    playing ? ytObj.pauseVideo() : ytObj.playVideo();
-    playing = !playing;
+    if (playing) {
+      bgm.pause();
+      playing = false;
+    } else {
+      bgm.play().then(() => { playing = true; updateUI(); }).catch(() => {});
+      playing = true;
+    }
     updateUI();
   }
 
