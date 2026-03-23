@@ -91,8 +91,8 @@
       white-space:normal; text-align:center;
       max-width:240px; line-height:1.3;
       touch-action:manipulation; -webkit-tap-highlight-color:transparent;
-      /* smooth fly animation */
-      transition:left 0.45s cubic-bezier(0.22,1.6,0.5,1), top 0.45s cubic-bezier(0.22,1.6,0.5,1);
+      /* smooth fly animation — relaxed speed */
+      transition:left 1.1s cubic-bezier(0.25,0.8,0.4,1), top 1.1s cubic-bezier(0.25,0.8,0.4,1);
     }
 
     /* ── TOAST ── */
@@ -324,43 +324,47 @@ function placeNoInit() {
   noBtn.style.transition = 'none';
   // re-enable after a tick
   requestAnimationFrame(() => {
-    noBtn.style.transition = 'left 0.45s cubic-bezier(0.22,1.6,0.5,1), top 0.45s cubic-bezier(0.22,1.6,0.5,1)';
+    noBtn.style.transition = 'left 1.1s cubic-bezier(0.25,0.8,0.4,1), top 1.1s cubic-bezier(0.25,0.8,0.4,1)';
   });
 }
 window.addEventListener('load', placeNoInit);
 window.addEventListener('resize', placeNoInit);
 
-/* Fly No button to a RANDOM far corner of the screen */
+/* Fly No button — nearby random spot, not aggressive edges */
 function flyNoBtn() {
   const vw  = window.innerWidth;
   const vh  = window.innerHeight;
   const bw  = noBtn.offsetWidth  + 8;
   const bh  = noBtn.offsetHeight + 8;
-  const pad = 6;
+  const pad = 12;
 
-  // Pick one of 4 edge zones at random and place far into it
-  const zone = Math.floor(Math.random() * 4);
-  let nx, ny;
-  if (zone === 0) {           // top edge
-    nx = pad + Math.random() * (vw - bw - pad * 2);
-    ny = pad + Math.random() * Math.min(vh * 0.15, 80);
-  } else if (zone === 1) {    // bottom edge
-    nx = pad + Math.random() * (vw - bw - pad * 2);
-    ny = vh - bh - pad - Math.random() * Math.min(vh * 0.15, 80);
-  } else if (zone === 2) {    // left edge
-    nx = pad + Math.random() * Math.min(vw * 0.15, 80);
-    ny = pad + Math.random() * (vh - bh - pad * 2);
-  } else {                    // right edge
-    nx = vw - bw - pad - Math.random() * Math.min(vw * 0.15, 80);
-    ny = pad + Math.random() * (vh - bh - pad * 2);
-  }
+  // Stay within middle 70% of screen — not screaming to the edges
+  const nx = pad + Math.random() * (vw - bw - pad * 2);
+  const ny = pad + Math.random() * (vh - bh - pad * 2);
 
   noBtn.style.left = nx + 'px';
   noBtn.style.top  = ny + 'px';
 }
 
+const LAST_NO = noTexts.length - 1; // index of final message
+
 function handleNo() {
   noCount++;
+
+  // Last escape — fly onto Yes button and trigger it
+  if (noCount >= LAST_NO) {
+    noBtn.textContent = "OK fine... YES! 💕";
+    const yr = yesBtn.getBoundingClientRect();
+    const bw = noBtn.offsetWidth;
+    const bh = noBtn.offsetHeight;
+    // Land exactly on top of Yes button
+    noBtn.style.transition = 'left 1.1s cubic-bezier(0.25,0.8,0.4,1), top 1.1s cubic-bezier(0.25,0.8,0.4,1)';
+    noBtn.style.left = (yr.left + yr.width / 2 - bw / 2) + 'px';
+    noBtn.style.top  = (yr.top  + yr.height / 2 - bh / 2) + 'px';
+    // After landing, auto-click Yes
+    setTimeout(() => sayYes(), 600);
+    return;
+  }
 
   // Update the button label to the current plea (stays visible as person chases it)
   noBtn.textContent = noTexts[Math.min(noCount, noTexts.length - 1)];
